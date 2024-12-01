@@ -23,14 +23,11 @@ const StatisticsPage = () => {
     (state: RootState) => state.statistics.statistics
   );
 
-
-
   return (
       <Box
         sx={{
           p: 3,
           backgroundColor: "#f4f6f8",
-          minHeight: "100vh",
         }}
       >
         <Box

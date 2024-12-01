@@ -16,10 +16,10 @@ import { IconListCheck, IconMail, IconUser } from "@tabler/icons-react";
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
   const handleClick2 = (event: any) => {
-    setAnchorEl2(event.currentTarget);
+    // setAnchorEl2(event.currentTarget);
   };
   const handleClose2 = () => {
-    setAnchorEl2(null);
+    // setAnchorEl2(null);
   };
 
   return (

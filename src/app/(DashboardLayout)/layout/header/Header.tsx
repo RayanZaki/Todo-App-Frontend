@@ -62,9 +62,9 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
           aria-controls="msgs-menu"
           aria-haspopup="true"
         >
-          <Badge variant="dot" color="primary">
+          {/* <Badge variant="dot" color="primary">
             <IconBellRinging size="21" stroke="1.5" />
-          </Badge>
+          </Badge> */}
         </IconButton>
         <Box flexGrow={1} />
         <Stack spacing={1} direction="row" alignItems="center">
@@ -76,7 +76,7 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
               },
             }}
           >
-            <Button
+            {/* <Button
               variant="contained"
               disableElevation
               color="primary"
@@ -84,7 +84,7 @@ const Header = ({ toggleMobileSidebar }: ItemType) => {
               href="https://www.wrappixel.com/templates/spike-nextjs-admin-template/"
             >
               Upgrade to Pro
-            </Button>
+            </Button> */}
           </Box>
           <Profile />
         </Stack>
