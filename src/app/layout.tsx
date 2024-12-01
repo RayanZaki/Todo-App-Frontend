@@ -3,13 +3,15 @@ import { baselightTheme } from "@/utils/theme/DefaultColors";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Provider } from "react-redux";
-import { store } from "../../redux/store";
+import { store } from "../lib/store";
+import { useGetTodosQuery } from "@/services/todo";
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <html lang="en">
       <body>

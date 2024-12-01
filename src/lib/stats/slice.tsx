@@ -1,11 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
   Refresh as RefreshIcon,
+  AttachMoney as AttachMoneyIcon,
+  People as PeopleIcon,
   TrendingUp as TrendingUpIcon,
   Assessment as AssessmentIcon,
-  AttachMoney as AttachMoneyIcon,
   Timeline as TimelineIcon,
-  People as PeopleIcon,
 } from "@mui/icons-material";
 
 interface StatisticsState {
@@ -16,7 +16,6 @@ interface StatisticsState {
     icon: React.ReactNode;
   }[];
 }
-
 
 export const statisticsSlice = createSlice({
   name: "statistics",

@@ -2,6 +2,7 @@ import { todosApi } from "@/services/todo";
 import { configureStore } from "@reduxjs/toolkit";
 import { todoSlice } from "./todo/slice";
 import { statisticsSlice } from "./stats/slice";
+import { setupListeners } from "@reduxjs/toolkit/query";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,9 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(todosApi.middleware),
 });
+
+
+setupListeners(store.dispatch);
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

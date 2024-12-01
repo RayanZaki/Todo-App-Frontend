@@ -22,8 +22,8 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../../redux/store";
-import { todoSlice } from "../../../redux/todo/slice";
+import { RootState } from "../../lib/store";
+import { todoSlice } from "../../lib/todo/slice";
 
 
 const TodoList = () => {

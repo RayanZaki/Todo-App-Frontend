@@ -16,3 +16,11 @@ export interface TodoPatchRequestSchema {
 export interface TodoSchema extends TodoPatchRequestSchema {
   id: number; // ID of the Todo
 }
+
+export interface StatisticsSchema {
+  n_total_todos: number;
+  n_todos: number;
+  n_modified: number;
+  n_modifications: number;
+  n_deleted: number;
+}
