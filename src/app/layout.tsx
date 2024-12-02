@@ -4,7 +4,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Provider } from "react-redux";
 import { store } from "../lib/store";
-import { useGetTodosQuery } from "@/services/todo";
+import { useGetTodosQuery } from "@/services/api";
 
 export default function RootLayout({
   children,

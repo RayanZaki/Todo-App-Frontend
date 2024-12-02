@@ -1,14 +1,10 @@
-import { todosApi } from "@/services/todo";
+import { todosApi } from "@/services/api";
 import { configureStore } from "@reduxjs/toolkit";
-import { todoSlice } from "./todo/slice";
-import { statisticsSlice } from "./stats/slice";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 export const store = configureStore({
   reducer: {
     todosApi: todosApi.reducer,
-    todos: todoSlice.reducer,
-    statistics: statisticsSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(todosApi.middleware),

@@ -17,6 +17,7 @@ export interface TodoSchema extends TodoPatchRequestSchema {
   id: number; // ID of the Todo
 }
 
+
 export interface StatisticsSchema {
   n_total_todos: number;
   n_todos: number;

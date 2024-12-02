@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import {
-  Grid,
   Box,
   Typography,
   Paper,
@@ -15,21 +14,21 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Checkbox,
 } from "@mui/material";
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../lib/store";
-import { todoSlice } from "../../lib/todo/slice";
 
+import { TodoSchema } from "@/types/todo";
+import { todosApi, useGetTodosQuery } from "@/services/api";
+import { useDispatch } from "react-redux";
 
 const TodoList = () => {
   const dispatch = useDispatch();
-  const todos = useSelector((state: RootState) => state.todos.todos);
-
+  const { data: todosResponse, isLoading, error } = useGetTodosQuery();
   const [newTodo, setNewTodo] = useState("");
   const [editingTodo, setEditingTodo] = useState<{
     id: number;
@@ -37,150 +36,192 @@ const TodoList = () => {
   } | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
 
-  const handleAddTodo = () => {
+  // Add Todo Handler
+  const handleAddTodo = async () => {
     if (newTodo.trim()) {
-      dispatch(todoSlice.actions.addTodo(newTodo.trim()));
-      setNewTodo("");
+      try {
+        // Dispatch the add todo action with optimistic update
+        await dispatch(
+          todosApi.endpoints.addTodo.initiate(newTodo.trim(), {
+            fixedCacheKey: "add-todo",
+          })
+        ).unwrap();
+        setNewTodo("");
+      } catch (err) {
+        console.error("Failed to add todo", err);
+      }
     }
   };
 
-  const handleDeleteTodo = (id: number) => {
-    dispatch(todoSlice.actions.removeTodo(id));
+  // Delete Todo Handler
+  const handleDeleteTodo = async (id: number) => {
+    try {
+      // Dispatch the delete todo action with optimistic update
+      await dispatch(
+        todosApi.endpoints.deleteTodo.initiate(id, {
+          fixedCacheKey: "delete-todo",
+        })
+      ).unwrap();
+    } catch (err) {
+      console.error("Failed to delete todo", err);
+    }
   };
 
-  const handleToggleComplete = (id: number) => {
-    dispatch(todoSlice.actions.toggleTodo(id));
+  // Toggle Complete Handler
+  const handleToggleComplete = async (todo: TodoSchema) => {
+    try {
+      // Dispatch the toggle todo action with optimistic update
+      await dispatch(
+        todosApi.endpoints.toggleTodo.initiate(
+          { id: todo.id, done: !todo.done },
+          { fixedCacheKey: "toggle-todo" }
+        )
+      ).unwrap();
+    } catch (err) {
+      console.error("Failed to toggle todo", err);
+    }
   };
 
+  // Edit Handlers
   const handleEditClick = (todo: { id: number; text: string }) => {
     setEditingTodo(todo);
     setOpenEditDialog(true);
   };
 
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (editingTodo) {
-      dispatch(
-        todoSlice.actions.editTodo({
-          id: editingTodo.id,
-          text: editingTodo.text,
-        })
-      );
-      setOpenEditDialog(false);
-      setEditingTodo(null);
+      try {
+        // Dispatch the edit todo action with optimistic update
+        await dispatch(
+          todosApi.endpoints.editTodo.initiate(
+            { id: editingTodo.id, text: editingTodo.text },
+            { fixedCacheKey: "edit-todo" }
+          )
+        ).unwrap();
+        setOpenEditDialog(false);
+        setEditingTodo(null);
+      } catch (err) {
+        console.error("Failed to edit todo", err);
+      }
     }
   };
 
+  // Loading and Error States
+  if (isLoading) return <Typography>Loading...</Typography>;
+  if (error) return <Typography>Error loading todos</Typography>;
+
   return (
-      <Box
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        width: "100%",
+      }}
+    >
+      <Paper
+        elevation={3}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          p: 3,
           width: "100%",
+          maxWidth: 500,
+          borderRadius: 2,
         }}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            p: 3,
-            width: "100%",
-            maxWidth: 500,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h4" gutterBottom align="center" sx={{ mb: 3 }}>
-            Todo List
-          </Typography>
+        <Typography variant="h4" gutterBottom align="center" sx={{ mb: 3 }}>
+          Todo List
+        </Typography>
 
-          <Box sx={{ display: "flex", mb: 2, width: "100%" }}>
+        {/* Add Todo Section */}
+        <Box sx={{ display: "flex", mb: 2, width: "100%" }}>
+          <TextField
+            fullWidth
+            variant="outlined"
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            placeholder="Add new todo"
+            sx={{ mr: 1 }}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleAddTodo();
+              }
+            }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleAddTodo}
+            startIcon={<AddIcon />}
+          >
+            Add
+          </Button>
+        </Box>
+
+        {/* Todo List */}
+        <List>
+          {todosResponse?.data.flat().map((todo: TodoSchema) => (
+            <ListItem
+              key={todo.id}
+              secondaryAction={
+                <>
+                  <IconButton
+                    edge="end"
+                    aria-label="edit"
+                    sx={{ mr: 1 }}
+                    onClick={() => handleEditClick(todo)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={() => handleDeleteTodo(todo.id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </>
+              }
+            >
+              <Checkbox
+                checked={!!todo.done}
+                onChange={() => handleToggleComplete(todo)}
+              />
+              <ListItemText
+                primary={todo.text}
+                sx={{
+                  textDecoration: todo.done ? "line-through" : "none",
+                }}
+              />
+            </ListItem>
+          ))}
+        </List>
+
+        {/* Edit Todo Dialog */}
+        <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+          <DialogTitle>Edit Todo</DialogTitle>
+          <DialogContent>
             <TextField
+              autoFocus
+              margin="dense"
               fullWidth
               variant="outlined"
-              value={newTodo}
-              onChange={(e) => setNewTodo(e.target.value)}
-              placeholder="Add new todo"
-              sx={{ mr: 1 }}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleAddTodo();
-                }
-              }}
+              value={editingTodo?.text || ""}
+              onChange={(e) =>
+                setEditingTodo((prev) =>
+                  prev ? { ...prev, text: e.target.value } : null
+                )
+              }
             />
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAddTodo}
-              startIcon={<AddIcon />}
-            >
-              Add
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
+            <Button onClick={handleEditSave} color="primary">
+              Save
             </Button>
-          </Box>
-
-          <List>
-            {todos.map((todo) => (
-              <ListItem
-                key={todo.id}
-                secondaryAction={
-                  <>
-                    <IconButton
-                      edge="end"
-                      aria-label="edit"
-                      sx={{ mr: 1 }}
-                      onClick={() => handleEditClick(todo)}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => handleDeleteTodo(todo.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </>
-                }
-              >
-                <ListItemText
-                  primary={todo.text}
-                  sx={{
-                    textDecoration: todo.completed ? "line-through" : "none",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleToggleComplete(todo.id)}
-                />
-              </ListItem>
-            ))}
-          </List>
-
-          {/* Edit Todo Dialog */}
-          <Dialog
-            open={openEditDialog}
-            onClose={() => setOpenEditDialog(false)}
-          >
-            <DialogTitle>Edit Todo</DialogTitle>
-            <DialogContent>
-              <TextField
-                autoFocus
-                margin="dense"
-                fullWidth
-                variant="outlined"
-                value={editingTodo?.text || ""}
-                onChange={(e) =>
-                  setEditingTodo((prev) =>
-                    prev ? { ...prev, text: e.target.value } : null
-                  )
-                }
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
-              <Button onClick={handleEditSave} color="primary">
-                Save
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Paper>
-      </Box>
+          </DialogActions>
+        </Dialog>
+      </Paper>
+    </Box>
   );
 };
 

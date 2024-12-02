@@ -4,7 +4,7 @@ import { Provider, useSelector, useDispatch } from "react-redux";
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "@/lib/store";
 import { StatisticsSchema } from "@/types/todo";
-import { useGetStatsQuery } from "@/services/todo";
+import { useGetStatsQuery } from "@/services/api";
 import LoadingPage from "../dashboard/LoadingPage";
 import {
   AttachMoney as AttachMoneyIcon,
