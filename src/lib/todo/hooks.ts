@@ -1,52 +1,95 @@
-// lib/todo/todoHooks.ts
-import { useCallback } from "react";
-import {
-  useAddTodoMutation,
-  useEditTodoMutation,
-  useDeleteTodoMutation,
-  useToggleTodoMutation,
-} from "../../services/api";
-import { TodoSchema, TodoPatchRequestSchema } from "@/types/todo";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { todosApi } from "@/services/api";
+import { TodoSchema } from "@/types/todo";
 
 export const useTodoActions = () => {
-    
-  const [addTodoMutation] = useAddTodoMutation();
-  const [editTodoMutation] = useEditTodoMutation();
-  const [deleteTodoMutation] = useDeleteTodoMutation();
-  const [toggleTodoMutation] = useToggleTodoMutation();
+  const dispatch = useDispatch();
+  const [newTodo, setNewTodo] = useState("");
+  const [editingTodo, setEditingTodo] = useState<{
+    id: number;
+    text: string;
+  } | null>(null);
+  
+  const [openEditDialog, setOpenEditDialog] = useState(false);
 
-  const addTodo = useCallback(
-    (text: string) => {
-      addTodoMutation(text);
-    },
-    [addTodoMutation]
-  );
+  const handleAddTodo = async () => {
+    if (newTodo.trim()) {
+      try {
+        await dispatch(
+          todosApi.endpoints.addTodo.initiate(newTodo.trim(), {
+            fixedCacheKey: "add-todo",
+          })
+        ).unwrap();
+        setNewTodo("");
+      } catch (err) {
+        console.error("Failed to add todo", err);
+      }
+    }
+  };
 
-  const editTodo = useCallback(
-    (todo: { id: number; text: string }) => {
-      editTodoMutation(todo);
-    },
-    [editTodoMutation]
-  );
+  const handleDeleteTodo = async (id: number) => {
+    try {
+      await dispatch(
+        todosApi.endpoints.deleteTodo.initiate(id, {
+          fixedCacheKey: "delete-todo",
+        })
+      ).unwrap();
+    } catch (err) {
+      console.error("Failed to delete todo", err);
+    }
+  };
 
-  const deleteTodo = useCallback(
-    (id: number) => {
-      deleteTodoMutation(id);
-    },
-    [deleteTodoMutation]
-  );
+  const handleToggleComplete = async (todo: TodoSchema) => {
+    try {
+      await dispatch(
+        todosApi.endpoints.toggleTodo.initiate(
+          { id: todo.id, done: !todo.done },
+          { fixedCacheKey: "toggle-todo" }
+        )
+      ).unwrap();
+    } catch (err) {
+      console.error("Failed to toggle todo", err);
+    }
+  };
 
-  const toggleTodo = useCallback(
-    (todo: { id: number; done: boolean }) => {
-      toggleTodoMutation(todo);
-    },
-    [toggleTodoMutation]
-  );
+  const handleEditClick = (todo: { id: number; text: string }) => {
+    setEditingTodo(todo);
+    setOpenEditDialog(true);
+  };
+
+  const handleEditSave = async () => {
+    if (editingTodo) {
+      try {
+        await dispatch(
+          todosApi.endpoints.editTodo.initiate(
+            { id: editingTodo.id, text: editingTodo.text },
+            { fixedCacheKey: "edit-todo" }
+          )
+        ).unwrap();
+        setOpenEditDialog(false);
+        setEditingTodo(null);
+      } catch (err) {
+        console.error("Failed to edit todo", err);
+      }
+    }
+  };
+
+  const handleEditChange = (text: string) => {
+    setEditingTodo((prev) => (prev ? { ...prev, text } : null));
+  };
 
   return {
-    addTodo,
-    editTodo,
-    deleteTodo,
-    toggleTodo,
+    newTodo,
+    setNewTodo,
+    editingTodo,
+    openEditDialog,
+    setOpenEditDialog,
+    handleAddTodo,
+    handleDeleteTodo,
+    handleToggleComplete,
+    handleEditClick,
+    handleEditSave,
+    handleEditChange,
   };
 };

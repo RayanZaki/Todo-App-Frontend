@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import {
   Box,
   Typography,
@@ -22,93 +21,35 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 
+import { useGetTodosQuery } from "@/services/api";
+import { useTodoActions } from "@/lib/todo/hooks";
+import LoadingPage from "@/components/dashboard/LoadingPage";
+import ErrorPage from "@/components/dashboard/ErrorPage";
 import { TodoSchema } from "@/types/todo";
-import { todosApi, useGetTodosQuery } from "@/services/api";
-import { useDispatch } from "react-redux";
 
 const TodoList = () => {
-  const dispatch = useDispatch();
   const { data: todosResponse, isLoading, error } = useGetTodosQuery();
-  const [newTodo, setNewTodo] = useState("");
-  const [editingTodo, setEditingTodo] = useState<{
-    id: number;
-    text: string;
-  } | null>(null);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-
-  // Add Todo Handler
-  const handleAddTodo = async () => {
-    if (newTodo.trim()) {
-      try {
-        // Dispatch the add todo action with optimistic update
-        await dispatch(
-          todosApi.endpoints.addTodo.initiate(newTodo.trim(), {
-            fixedCacheKey: "add-todo",
-          })
-        ).unwrap();
-        setNewTodo("");
-      } catch (err) {
-        console.error("Failed to add todo", err);
-      }
-    }
-  };
-
-  // Delete Todo Handler
-  const handleDeleteTodo = async (id: number) => {
-    try {
-      // Dispatch the delete todo action with optimistic update
-      await dispatch(
-        todosApi.endpoints.deleteTodo.initiate(id, {
-          fixedCacheKey: "delete-todo",
-        })
-      ).unwrap();
-    } catch (err) {
-      console.error("Failed to delete todo", err);
-    }
-  };
-
-  // Toggle Complete Handler
-  const handleToggleComplete = async (todo: TodoSchema) => {
-    try {
-      // Dispatch the toggle todo action with optimistic update
-      await dispatch(
-        todosApi.endpoints.toggleTodo.initiate(
-          { id: todo.id, done: !todo.done },
-          { fixedCacheKey: "toggle-todo" }
-        )
-      ).unwrap();
-    } catch (err) {
-      console.error("Failed to toggle todo", err);
-    }
-  };
-
-  // Edit Handlers
-  const handleEditClick = (todo: { id: number; text: string }) => {
-    setEditingTodo(todo);
-    setOpenEditDialog(true);
-  };
-
-  const handleEditSave = async () => {
-    if (editingTodo) {
-      try {
-        // Dispatch the edit todo action with optimistic update
-        await dispatch(
-          todosApi.endpoints.editTodo.initiate(
-            { id: editingTodo.id, text: editingTodo.text },
-            { fixedCacheKey: "edit-todo" }
-          )
-        ).unwrap();
-        setOpenEditDialog(false);
-        setEditingTodo(null);
-      } catch (err) {
-        console.error("Failed to edit todo", err);
-      }
-    }
-  };
+  const {
+    newTodo,
+    setNewTodo,
+    editingTodo,
+    openEditDialog,
+    setOpenEditDialog,
+    handleAddTodo,
+    handleDeleteTodo,
+    handleToggleComplete,
+    handleEditClick,
+    handleEditSave,
+    handleEditChange,
+  } = useTodoActions();
 
   // Loading and Error States
-  if (isLoading) return <Typography>Loading...</Typography>;
-  if (error) return <Typography>Error loading todos</Typography>;
+  if (isLoading) {
+    return <LoadingPage title="Todo Statistics" />;
+  }
+
+  if (error)
+    return <ErrorPage title="Todo List" message="Could not load list" />;
 
   return (
     <Box
@@ -206,11 +147,7 @@ const TodoList = () => {
               fullWidth
               variant="outlined"
               value={editingTodo?.text || ""}
-              onChange={(e) =>
-                setEditingTodo((prev) =>
-                  prev ? { ...prev, text: e.target.value } : null
-                )
-              }
+              onChange={(e) => handleEditChange(e.target.value)}
             />
           </DialogContent>
           <DialogActions>

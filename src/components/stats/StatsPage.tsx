@@ -13,6 +13,7 @@ import {
   Timeline as TimelineIcon,
 } from "@mui/icons-material";
 import { useGetStatsQuery } from "@/services/api";
+import ErrorPage from "../dashboard/ErrorPage";
 
 
 // Statistics
@@ -33,17 +34,10 @@ const StatisticsPage = () => {
 
   if (isError) {
     return (
-      <Box
-        sx={{
-          p: 3,
-          backgroundColor: "#f4f6f8",
-        }}
-      >
-        <Typography variant="h4">Dashboard Statistics</Typography>
-        <Typography variant="h6" color="error">
-          Error loading statistics
-        </Typography>
-      </Box>
+      <ErrorPage
+        title="Dashboard Statistics"
+        message="Error loading statistics"
+      />
     );
   }
   return (
