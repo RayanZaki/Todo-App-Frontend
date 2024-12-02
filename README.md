@@ -1,10 +1,14 @@
 ## Getting Started
 
-
+0. Pull the github repo:
+```bash
+git clone git@github.com:RayanZaki/Todo-App-Frontend.git
+cd Todo-App-Frontend
+```
 1. Set the .env file
 ```bash
 touch .env
-echo "NEXT_PUBLIC_API_URL=localhost:5000" > .env
+echo "NEXT_PUBLIC_API_URL=http://localhost:5000" > .env
 ```
 
 2. install dependencies
