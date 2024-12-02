@@ -34,8 +34,9 @@ const TodoList = () => {
     error,
   } = useGetTodosPaginatedQuery({
     startIndex: 0,
-    ppageSize: 10, // Adjust page size as needed
+    ppageSize: -1, // Adjust page size as needed
   });
+
   const {
     newTodo,
     setNewTodo,
