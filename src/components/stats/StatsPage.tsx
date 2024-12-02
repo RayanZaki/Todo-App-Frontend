@@ -4,7 +4,6 @@ import { Provider, useSelector, useDispatch } from "react-redux";
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "@/lib/store";
 import { StatisticsSchema } from "@/types/todo";
-import { useGetStatsQuery } from "@/services/api";
 import LoadingPage from "../dashboard/LoadingPage";
 import {
   AttachMoney as AttachMoneyIcon,
@@ -13,6 +12,7 @@ import {
   Assessment as AssessmentIcon,
   Timeline as TimelineIcon,
 } from "@mui/icons-material";
+import { useGetStatsQuery } from "@/services/api";
 
 
 // Statistics
@@ -25,11 +25,7 @@ const icons = [
 ];
 // Statistics component
 const StatisticsPage = () => {
-  const {data, isError, isLoading} = useGetStatsQuery(); 
-  const dispatch = useDispatch();
-  const statistics = useSelector(
-    (state: RootState) => state.statistics.statistics
-  );
+  const { data, isError, isLoading } = useGetStatsQuery(); 
 
   if (isLoading) {
     return <LoadingPage title="Todo Statistics"/>;
