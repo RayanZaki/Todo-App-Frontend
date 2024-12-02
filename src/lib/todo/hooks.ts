@@ -1,26 +1,30 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { todosApi } from "@/services/api";
+import {
+  useAddTodoMutation,
+  useDeleteTodoMutation,
+  useToggleTodoMutation,
+  useEditTodoMutation,
+} from "@/services/api";
 import { TodoSchema } from "@/types/todo";
 
 export const useTodoActions = () => {
-  const dispatch = useDispatch();
+  const [addTodo] = useAddTodoMutation();
+  const [deleteTodo] = useDeleteTodoMutation();
+  const [toggleTodo] = useToggleTodoMutation();
+  const [editTodo] = useEditTodoMutation();
+
   const [newTodo, setNewTodo] = useState("");
   const [editingTodo, setEditingTodo] = useState<{
     id: number;
     text: string;
   } | null>(null);
-  
+
   const [openEditDialog, setOpenEditDialog] = useState(false);
 
   const handleAddTodo = async () => {
     if (newTodo.trim()) {
       try {
-        await dispatch(
-          todosApi.endpoints.addTodo.initiate(newTodo.trim(), {
-            fixedCacheKey: "add-todo",
-          })
-        ).unwrap();
+        await addTodo(newTodo.trim()).unwrap();
         setNewTodo("");
       } catch (err) {
         console.error("Failed to add todo", err);
@@ -30,11 +34,7 @@ export const useTodoActions = () => {
 
   const handleDeleteTodo = async (id: number) => {
     try {
-      await dispatch(
-        todosApi.endpoints.deleteTodo.initiate(id, {
-          fixedCacheKey: "delete-todo",
-        })
-      ).unwrap();
+      await deleteTodo(id).unwrap();
     } catch (err) {
       console.error("Failed to delete todo", err);
     }
@@ -42,12 +42,7 @@ export const useTodoActions = () => {
 
   const handleToggleComplete = async (todo: TodoSchema) => {
     try {
-      await dispatch(
-        todosApi.endpoints.toggleTodo.initiate(
-          { id: todo.id, done: !todo.done },
-          { fixedCacheKey: "toggle-todo" }
-        )
-      ).unwrap();
+      await toggleTodo({ id: todo.id, done: !todo.done }).unwrap();
     } catch (err) {
       console.error("Failed to toggle todo", err);
     }
@@ -61,12 +56,10 @@ export const useTodoActions = () => {
   const handleEditSave = async () => {
     if (editingTodo) {
       try {
-        await dispatch(
-          todosApi.endpoints.editTodo.initiate(
-            { id: editingTodo.id, text: editingTodo.text },
-            { fixedCacheKey: "edit-todo" }
-          )
-        ).unwrap();
+        await editTodo({
+          id: editingTodo.id,
+          text: editingTodo.text,
+        }).unwrap();
         setOpenEditDialog(false);
         setEditingTodo(null);
       } catch (err) {

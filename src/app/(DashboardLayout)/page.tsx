@@ -21,14 +21,21 @@ import {
   Delete as DeleteIcon,
 } from "@mui/icons-material";
 
-import { useGetTodosQuery } from "@/services/api";
+import { useGetTodosPaginatedQuery, useGetTodosQuery } from "@/services/api";
 import { useTodoActions } from "@/lib/todo/hooks";
 import LoadingPage from "@/components/dashboard/LoadingPage";
 import ErrorPage from "@/components/dashboard/ErrorPage";
 import { TodoSchema } from "@/types/todo";
 
 const TodoList = () => {
-  const { data: todosResponse, isLoading, error } = useGetTodosQuery();
+  const {
+    data: todosResponse,
+    isLoading,
+    error,
+  } = useGetTodosPaginatedQuery({
+    startIndex: 0,
+    ppageSize: 10, // Adjust page size as needed
+  });
   const {
     newTodo,
     setNewTodo,
